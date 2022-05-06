@@ -130,7 +130,7 @@ func (challenge *Challenge) SendSecurityCode(code string) error {
 		if err == nil {
 			*challenge = *resp.Challenge
 			challenge.insta = insta
-			challenge.LoggedInUser.inst = insta
+			challenge.LoggedInUser.insta = insta
 			insta.Account = challenge.LoggedInUser
 		}
 	}

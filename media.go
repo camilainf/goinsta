@@ -239,7 +239,7 @@ func (item *Item) MediaToString() string {
 
 func setToItem(item *Item, media Media) {
 	item.media = media
-	item.User.inst = media.instagram()
+	item.User.insta = media.instagram()
 	item.Comments = newComments(item)
 	for i := range item.CarouselMedia {
 		item.CarouselMedia[i].User = item.User
@@ -251,7 +251,7 @@ func setToItem(item *Item, media Media) {
 // mimics the setToItem but for the SavedMedia items
 func setToMediaItem(item *MediaItem, media Media) {
 	item.Media.media = media
-	item.Media.User.inst = media.instagram()
+	item.Media.User.insta = media.instagram()
 
 	item.Media.Comments = newComments(&item.Media)
 
@@ -280,14 +280,14 @@ func getname(name string) string {
 	return name
 }
 
-func download(inst *Instagram, url, dst string) (string, error) {
+func download(insta *Instagram, url, dst string) (string, error) {
 	file, err := os.Create(dst)
 	if err != nil {
 		return "", err
 	}
 	defer file.Close()
 
-	resp, err := inst.c.Get(url)
+	resp, err := insta.c.Get(url)
 	if err != nil {
 		return "", err
 	}
@@ -513,7 +513,7 @@ func (item *Item) Download(folder, name string) (imgs, vds string, err error) {
 	var nname string
 	imgFolder := path.Join(folder, "images")
 	vidFolder := path.Join(folder, "videos")
-	inst := item.media.instagram()
+	insta := item.media.instagram()
 
 	os.MkdirAll(folder, 0777)
 	os.MkdirAll(imgFolder, 0777)
@@ -533,7 +533,7 @@ func (item *Item) Download(folder, name string) (imgs, vds string, err error) {
 		}
 		nname = getname(nname)
 
-		vds, err = download(inst, vds, nname)
+		vds, err = download(insta, vds, nname)
 		return "", vds, err
 	}
 
@@ -551,7 +551,7 @@ func (item *Item) Download(folder, name string) (imgs, vds string, err error) {
 		}
 		nname = getname(nname)
 
-		imgs, err = download(inst, imgs, nname)
+		imgs, err = download(insta, imgs, nname)
 		return imgs, "", err
 	}
 
@@ -639,7 +639,7 @@ type Media interface {
 
 //StoryMedia is the struct that handles the information from the methods to get info about Stories.
 type StoryMedia struct {
-	inst     *Instagram
+	insta    *Instagram
 	endpoint string
 	uid      int64
 
@@ -670,7 +670,7 @@ type StoryMedia struct {
 //
 // See example: examples/media/deleteStories.go
 func (media *StoryMedia) Delete() error {
-	insta := media.inst
+	insta := media.insta
 	data, err := insta.prepareData(
 		map[string]interface{}{
 			"media_id": media.ID(),
@@ -700,7 +700,7 @@ func (media *StoryMedia) ID() string {
 }
 
 func (media *StoryMedia) instagram() *Instagram {
-	return media.inst
+	return media.insta
 }
 
 func (media *StoryMedia) setValues() {
@@ -717,7 +717,7 @@ func (media StoryMedia) Error() error {
 // Seen marks story as seen.
 /*
 func (media *StoryMedia) Seen() error {
-	insta := media.inst
+	insta := media.insta
 	data, err := insta.prepareData(
 		map[string]interface{}{
 			"container_module":   "feed_timeline",
@@ -755,7 +755,7 @@ type trayRequest struct {
 //
 // This function updates StoryMedia.Items
 func (media *StoryMedia) Sync() error {
-	insta := media.inst
+	insta := media.insta
 	query := []trayRequest{
 		{"SUPPORTED_SDK_VERSIONS", "9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0"},
 		{"FACE_TRACKER_VERSION", "10"},
@@ -812,7 +812,7 @@ func (media *StoryMedia) Next(params ...interface{}) bool {
 		return false
 	}
 
-	insta := media.inst
+	insta := media.insta
 	endpoint := media.endpoint
 	if media.uid != 0 {
 		endpoint = fmt.Sprintf(endpoint, media.uid)
@@ -825,7 +825,7 @@ func (media *StoryMedia) Next(params ...interface{}) bool {
 		if err == nil {
 			// TODO check NextID media
 			*media = m
-			media.inst = insta
+			media.insta = insta
 			media.endpoint = endpoint
 			media.err = ErrNoMore // TODO: See if stories has pagination
 			media.setValues()
@@ -838,7 +838,7 @@ func (media *StoryMedia) Next(params ...interface{}) bool {
 
 // FeedMedia represent a set of media items
 type FeedMedia struct {
-	inst *Instagram
+	insta *Instagram
 
 	err error
 
@@ -867,12 +867,12 @@ func (media *FeedMedia) Delete() error {
 }
 
 func (media *FeedMedia) instagram() *Instagram {
-	return media.inst
+	return media.insta
 }
 
 // SetInstagram set instagram
-func (media *FeedMedia) SetInstagram(inst *Instagram) {
-	media.inst = inst
+func (media *FeedMedia) SetInstagram(insta *Instagram) {
+	media.insta = insta
 }
 
 // SetID sets media ID
@@ -884,7 +884,7 @@ func (media *FeedMedia) SetID(id interface{}) {
 // Sync updates media values.
 func (media *FeedMedia) Sync() error {
 	id := media.ID()
-	insta := media.inst
+	insta := media.insta
 
 	data, err := insta.prepareData(
 		map[string]interface{}{
@@ -910,7 +910,7 @@ func (media *FeedMedia) Sync() error {
 	err = json.Unmarshal(body, &m)
 	*media = m
 	media.endpoint = urlMediaInfo
-	media.inst = insta
+	media.insta = insta
 	media.NextID = id
 	media.setValues()
 	return err
@@ -949,7 +949,7 @@ func (media *FeedMedia) Next(params ...interface{}) bool {
 		return false
 	}
 
-	insta := media.inst
+	insta := media.insta
 	endpoint := media.endpoint
 	next := media.ID()
 	ranked := "true"
@@ -988,7 +988,7 @@ func (media *FeedMedia) Next(params ...interface{}) bool {
 		err = d.Decode(&m)
 		if err == nil {
 			*media = m
-			media.inst = insta
+			media.insta = insta
 			media.endpoint = endpoint
 			if m.NextID == 0 || !m.MoreAvailable {
 				media.err = ErrNoMore
@@ -1008,7 +1008,7 @@ type MediaItem struct {
 
 // SavedMedia stores the information about media being saved before in my account.
 type SavedMedia struct {
-	inst     *Instagram
+	insta    *Instagram
 	endpoint string
 
 	err error
@@ -1031,7 +1031,7 @@ func (media *SavedMedia) Next(params ...interface{}) bool {
 		return false
 	}
 
-	insta := media.inst
+	insta := media.insta
 	endpoint := media.endpoint
 	next := media.ID()
 
@@ -1057,7 +1057,7 @@ func (media *SavedMedia) Next(params ...interface{}) bool {
 
 	*media = m
 
-	media.inst = insta
+	media.insta = insta
 	media.endpoint = endpoint
 	media.err = nil
 
@@ -1096,7 +1096,7 @@ func (media *SavedMedia) Delete() error {
 
 // instagram returns the media instagram
 func (media *SavedMedia) instagram() *Instagram {
-	return media.inst
+	return media.insta
 }
 
 // setValues set the SavedMedia items values

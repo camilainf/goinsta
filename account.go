@@ -14,7 +14,7 @@ type accountResp struct {
 //
 // See examples: examples/account/*
 type Account struct {
-	inst *Instagram
+	insta *Instagram
 
 	ID                         int64        `json:"pk"`
 	Username                   string       `json:"username"`
@@ -72,7 +72,7 @@ type Account struct {
 
 // Sync updates account information
 func (account *Account) Sync() error {
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (account *Account) Sync() error {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*account = resp.Account
-			account.inst = insta
+			account.insta = insta
 		}
 	}
 	return err
@@ -100,7 +100,7 @@ func (account *Account) Sync() error {
 //
 // See example: examples/account/changePass.go
 func (account *Account) ChangePassword(old, new string) error {
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData(
 		map[string]interface{}{
 			"old_password":  old,
@@ -131,7 +131,7 @@ type profResp struct {
 //
 // See example: examples/account/removeProfilePic.go
 func (account *Account) RemoveProfilePic() error {
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData()
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (account *Account) RemoveProfilePic() error {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*account = resp.Account
-			account.inst = insta
+			account.insta = insta
 		}
 	}
 	return err
@@ -161,7 +161,7 @@ func (account *Account) RemoveProfilePic() error {
 //
 // See example: examples/account/setPrivate.go
 func (account *Account) SetPrivate() error {
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData()
 	if err != nil {
 		return err
@@ -179,7 +179,7 @@ func (account *Account) SetPrivate() error {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*account = resp.Account
-			account.inst = insta
+			account.insta = insta
 		}
 	}
 	return err
@@ -191,7 +191,7 @@ func (account *Account) SetPrivate() error {
 //
 // See example: examples/account/setPublic.go
 func (account *Account) SetPublic() error {
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData()
 	if err != nil {
 		return err
@@ -209,7 +209,7 @@ func (account *Account) SetPublic() error {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*account = resp.Account
-			account.inst = insta
+			account.insta = insta
 		}
 	}
 	return err
@@ -223,7 +223,7 @@ func (account *Account) SetPublic() error {
 func (account *Account) Followers() *Users {
 	endpoint := fmt.Sprintf(urlFollowers, account.ID)
 	users := &Users{}
-	users.inst = account.inst
+	users.insta = account.insta
 	users.endpoint = endpoint
 	return users
 }
@@ -236,7 +236,7 @@ func (account *Account) Followers() *Users {
 func (account *Account) Following() *Users {
 	endpoint := fmt.Sprintf(urlFollowing, account.ID)
 	users := &Users{}
-	users.inst = account.inst
+	users.insta = account.insta
 	users.endpoint = endpoint
 	return users
 }
@@ -250,10 +250,10 @@ func (account *Account) Following() *Users {
 //
 // For pagination use FeedMedia.Next()
 func (account *Account) Feed(params ...interface{}) *FeedMedia {
-	insta := account.inst
+	insta := account.insta
 
 	media := &FeedMedia{}
-	media.inst = insta
+	media.insta = insta
 	media.endpoint = urlUserFeed
 	media.uid = account.ID
 
@@ -275,7 +275,7 @@ func (account *Account) Feed(params ...interface{}) *FeedMedia {
 func (account *Account) Stories() *StoryMedia {
 	media := &StoryMedia{}
 	media.uid = account.ID
-	media.inst = account.inst
+	media.insta = account.insta
 	media.endpoint = urlUserStories
 	return media
 }
@@ -285,12 +285,12 @@ func (account *Account) Stories() *StoryMedia {
 // For pagination use FeedMedia.Next()
 func (account *Account) Tags(minTimestamp []byte) (*FeedMedia, error) {
 	timestamp := b2s(minTimestamp)
-	body, err := account.inst.sendRequest(
+	body, err := account.insta.sendRequest(
 		&reqOptions{
 			Endpoint: fmt.Sprintf(urlUserTags, account.ID),
 			Query: map[string]string{
 				"max_id":         "",
-				"rank_token":     account.inst.rankToken,
+				"rank_token":     account.insta.rankToken,
 				"min_timestamp":  timestamp,
 				"ranked_content": "true",
 			},
@@ -302,7 +302,7 @@ func (account *Account) Tags(minTimestamp []byte) (*FeedMedia, error) {
 
 	media := &FeedMedia{}
 	err = json.Unmarshal(body, media)
-	media.inst = account.inst
+	media.insta = account.insta
 	media.endpoint = urlUserTags
 	media.uid = account.ID
 	return media, err
@@ -313,7 +313,7 @@ func (account *Account) Tags(minTimestamp []byte) (*FeedMedia, error) {
 // use the Next() method.
 func (account *Account) Saved() *SavedMedia {
 	return &SavedMedia{
-		inst:     account.inst,
+		insta:    account.insta,
 		endpoint: urlFeedSaved,
 		err:      nil,
 	}
@@ -325,7 +325,7 @@ type editResp struct {
 }
 
 func (account *Account) edit() {
-	insta := account.inst
+	insta := account.insta
 	acResp := editResp{}
 	body, err := insta.sendRequest(
 		&reqOptions{
@@ -338,7 +338,7 @@ func (account *Account) edit() {
 	if err == nil {
 		err = json.Unmarshal(body, &acResp)
 		if err == nil {
-			acResp.Account.inst = insta
+			acResp.Account.insta = insta
 			*account = acResp.Account
 		}
 	}
@@ -349,7 +349,7 @@ func (account *Account) edit() {
 // This function updates current Account information.
 func (account *Account) SetBiography(bio string) error {
 	account.edit() // preparing to edit
-	insta := account.inst
+	insta := account.insta
 	data, err := insta.prepareData(
 		map[string]interface{}{
 			"raw_text": bio,
@@ -384,17 +384,17 @@ func (account *Account) SetBiography(bio string) error {
 
 // Liked are liked publications
 func (account *Account) Liked() *FeedMedia {
-	insta := account.inst
+	insta := account.insta
 
 	media := &FeedMedia{}
-	media.inst = insta
+	media.insta = insta
 	media.endpoint = urlFeedLiked
 	return media
 }
 
 // PendingFollowRequests returns pending follow requests.
 func (account *Account) PendingFollowRequests() ([]User, error) {
-	insta := account.inst
+	insta := account.insta
 	resp, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: urlFriendshipPending,
@@ -425,10 +425,10 @@ func (account *Account) PendingFollowRequests() ([]User, error) {
 //
 // For pagination use FeedMedia.Next()
 func (account *Account) Archived(params ...interface{}) *FeedMedia {
-	insta := account.inst
+	insta := account.insta
 
 	media := &FeedMedia{}
-	media.inst = insta
+	media.insta = insta
 	media.endpoint = urlUserArchived
 
 	for _, param := range params {

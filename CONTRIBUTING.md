@@ -20,12 +20,12 @@ import (
 )
 
 func main() {
-	inst := goinsta.New("user", "password")
-	err := inst.Login()
+	insta := goinsta.New("user", "password")
+	err := insta.Login()
 	if err != nil {
 		fmt.Fatal(err)
 	}
-	fmt.Print(utilities.ExportAsBase64String(inst))
+	fmt.Print(utilities.ExportAsBase64String(insta))
 }
 ```
 

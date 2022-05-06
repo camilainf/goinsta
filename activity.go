@@ -9,13 +9,13 @@ import (
 //
 // You can get Recent and Following activities.
 type Activity struct {
-	inst *Instagram
+	insta *Instagram
 }
 
 //FollowingActivity is the latest activity of the people you are following
 type FollowingActivity struct {
-	inst *Instagram
-	err  error
+	insta *Instagram
+	err   error
 
 	AutoLoadMoreEnabled bool  `json:"auto_load_more_enabled"`
 	NextID              int64 `json:"next_max_id"`
@@ -62,7 +62,7 @@ func (act *FollowingActivity) Next() bool {
 	if act.err != nil {
 		return false
 	}
-	insta := act.inst
+	insta := act.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: urlActivityFollowing,
@@ -77,7 +77,7 @@ func (act *FollowingActivity) Next() bool {
 		err = json.Unmarshal(body, &act2)
 		if err == nil {
 			*act = act2
-			act.inst = insta
+			act.insta = insta
 			if len(act.Stories) == 0 || act.NextID == 0 {
 				act.err = ErrNoMore
 			}
@@ -92,8 +92,8 @@ func (act *FollowingActivity) Next() bool {
 //
 // See example: examples/activity/recent.go
 type MineActivity struct {
-	inst *Instagram
-	err  error
+	insta *Instagram
+	err   error
 
 	// Ad is every column of Activity section
 	Ad struct {
@@ -163,7 +163,7 @@ func (act *MineActivity) Next() bool {
 	if act.err != nil {
 		return false
 	}
-	insta := act.inst
+	insta := act.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: urlActivityRecent,
@@ -178,7 +178,7 @@ func (act *MineActivity) Next() bool {
 		err = json.Unmarshal(body, &act2)
 		if err == nil {
 			*act = act2
-			act.inst = insta
+			act.insta = insta
 			if len(act.Stories) == 0 || act.NextID == 0 {
 				act.err = ErrNoMore
 			}
@@ -189,9 +189,9 @@ func (act *MineActivity) Next() bool {
 	return false
 }
 
-func newActivity(inst *Instagram) *Activity {
+func newActivity(insta *Instagram) *Activity {
 	act := &Activity{
-		inst: inst,
+		insta: insta,
 	}
 	return act
 }
@@ -202,8 +202,8 @@ func newActivity(inst *Instagram) *Activity {
 //
 // See example: examples/activity/following.go
 func (act *Activity) Following() *FollowingActivity {
-	insta := act.inst
-	nact := &FollowingActivity{inst: insta}
+	insta := act.insta
+	nact := &FollowingActivity{insta: insta}
 	return nact
 }
 
@@ -213,7 +213,7 @@ func (act *Activity) Following() *FollowingActivity {
 //
 // See example: examples/activity/recent.go
 func (act *Activity) Recent() *MineActivity {
-	insta := act.inst
-	nact := &MineActivity{inst: insta}
+	insta := act.insta
+	nact := &MineActivity{insta: insta}
 	return nact
 }

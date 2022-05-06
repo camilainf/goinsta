@@ -286,7 +286,7 @@ floop:
 
 // Comment is a type of Media retrieved by the Comments methods
 type Comment struct {
-	inst  *Instagram
+	insta *Instagram
 	idstr string
 
 	ID                             int64     `json:"pk"`
@@ -315,13 +315,13 @@ type Comment struct {
 	Status                         string    `json:"status"`
 }
 
-func (c *Comment) setValues(inst *Instagram) {
-	c.User.inst = inst
+func (c *Comment) setValues(insta *Instagram) {
+	c.User.insta = insta
 	for i := range c.OtherPreviewUsers {
-		c.OtherPreviewUsers[i].inst = inst
+		c.OtherPreviewUsers[i].insta = insta
 	}
 	for i := range c.PreviewChildComments {
-		c.PreviewChildComments[i].setValues(inst)
+		c.PreviewChildComments[i].setValues(insta)
 	}
 }
 
@@ -337,12 +337,12 @@ func (c Comment) getid() string {
 
 // Like likes comment.
 func (c *Comment) Like() error {
-	data, err := c.inst.prepareData()
+	data, err := c.insta.prepareData()
 	if err != nil {
 		return err
 	}
 
-	_, err = c.inst.sendRequest(
+	_, err = c.insta.sendRequest(
 		&reqOptions{
 			Endpoint: fmt.Sprintf(urlCommentLike, c.getid()),
 			Query:    generateSignature(data),
@@ -354,12 +354,12 @@ func (c *Comment) Like() error {
 
 // Unlike unlikes comment.
 func (c *Comment) Unlike() error {
-	data, err := c.inst.prepareData()
+	data, err := c.insta.prepareData()
 	if err != nil {
 		return err
 	}
 
-	_, err = c.inst.sendRequest(
+	_, err = c.insta.sendRequest(
 		&reqOptions{
 			Endpoint: fmt.Sprintf(urlCommentUnlike, c.getid()),
 			Query:    generateSignature(data),

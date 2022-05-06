@@ -245,20 +245,20 @@ type Tray struct {
 	Status               string      `json:"status"`
 }
 
-func (tray *Tray) set(inst *Instagram, url string) {
+func (tray *Tray) set(insta *Instagram, url string) {
 	for i := range tray.Stories {
-		tray.Stories[i].inst = inst
+		tray.Stories[i].insta = insta
 		tray.Stories[i].endpoint = url
 		tray.Stories[i].setValues()
 	}
 	for i := range tray.Lives.LiveItems {
-		tray.Lives.LiveItems[i].User.inst = inst
+		tray.Lives.LiveItems[i].User.insta = insta
 		for j := range tray.Lives.LiveItems[i].Broadcasts {
-			tray.Lives.LiveItems[i].Broadcasts[j].BroadcastOwner.inst = inst
+			tray.Lives.LiveItems[i].Broadcasts[j].BroadcastOwner.insta = insta
 		}
 	}
 	for i := range tray.Broadcasts {
-		tray.Broadcasts[i].BroadcastOwner.inst = inst
+		tray.Broadcasts[i].BroadcastOwner.insta = insta
 	}
 }
 

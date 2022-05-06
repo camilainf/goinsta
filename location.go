@@ -6,11 +6,11 @@ import (
 )
 
 type LocationInstance struct {
-	inst *Instagram
+	insta *Instagram
 }
 
-func newLocation(inst *Instagram) *LocationInstance {
-	return &LocationInstance{inst: inst}
+func newLocation(insta *Instagram) *LocationInstance {
+	return &LocationInstance{insta: insta}
 }
 
 type LayoutSection struct {
@@ -40,7 +40,7 @@ type Section struct {
 
 func (l *LocationInstance) Feeds(locationID int64) (*Section, error) {
 	// TODO: use pagination for location feeds.
-	insta := l.inst
+	insta := l.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: fmt.Sprintf(urlFeedLocations, locationID),

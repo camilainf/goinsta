@@ -6,12 +6,12 @@ import (
 
 // Timeline is the object to represent the main feed on instagram, the first page that shows the latest feeds of my following contacts.
 type Timeline struct {
-	inst *Instagram
+	insta *Instagram
 }
 
-func newTimeline(inst *Instagram) *Timeline {
+func newTimeline(insta *Instagram) *Timeline {
 	time := &Timeline{
-		inst: inst,
+		insta: insta,
 	}
 	return time
 }
@@ -20,23 +20,23 @@ func newTimeline(inst *Instagram) *Timeline {
 //
 // For pagination use FeedMedia.Next()
 func (time *Timeline) Get() *FeedMedia {
-	insta := time.inst
+	insta := time.insta
 	media := &FeedMedia{}
-	media.inst = insta
+	media.insta = insta
 	media.endpoint = urlTimeline
 	return media
 }
 
 // Stories returns slice of StoryMedia
 func (time *Timeline) Stories() (*Tray, error) {
-	body, err := time.inst.sendSimpleRequest(urlStories)
+	body, err := time.insta.sendSimpleRequest(urlStories)
 	if err == nil {
 		tray := &Tray{}
 		err = json.Unmarshal(body, tray)
 		if err != nil {
 			return nil, err
 		}
-		tray.set(time.inst, urlStories)
+		tray.set(time.insta, urlStories)
 		return tray, nil
 	}
 	return nil, err

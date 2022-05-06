@@ -43,8 +43,8 @@ type InboxItem struct {
 // Inbox contains Conversations. Each conversation has InboxItems.
 // InboxItems are the message of the chat.
 type Inbox struct {
-	inst *Instagram
-	err  error
+	insta *Instagram
+	err   error
 
 	Conversations []Conversation `json:"threads"`
 
@@ -68,8 +68,8 @@ type inboxResp struct {
 	Status               string `json:"status"`
 }
 
-func newInbox(inst *Instagram) *Inbox {
-	return &Inbox{inst: inst}
+func newInbox(insta *Instagram) *Inbox {
+	return &Inbox{insta: insta}
 }
 
 func (inbox *Inbox) sync(pending bool, params map[string]string) error {
@@ -78,7 +78,7 @@ func (inbox *Inbox) sync(pending bool, params map[string]string) error {
 		endpoint = urlInboxPending
 	}
 
-	insta := inbox.inst
+	insta := inbox.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: endpoint,
@@ -91,12 +91,12 @@ func (inbox *Inbox) sync(pending bool, params map[string]string) error {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*inbox = resp.Inbox
-			inbox.inst = insta
+			inbox.insta = insta
 			inbox.SeqID = resp.Inbox.SeqID
 			inbox.PendingRequestsTotal = resp.Inbox.PendingRequestsTotal
 			inbox.SnapshotAtMs = resp.Inbox.SnapshotAtMs
 			for i := range inbox.Conversations {
-				inbox.Conversations[i].inst = insta
+				inbox.Conversations[i].insta = insta
 				inbox.Conversations[i].firstRun = true
 			}
 		}
@@ -112,7 +112,7 @@ func (inbox *Inbox) next(pending bool, params map[string]string) bool {
 	if inbox.err != nil {
 		return false
 	}
-	insta := inbox.inst
+	insta := inbox.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: endpoint,
@@ -124,12 +124,12 @@ func (inbox *Inbox) next(pending bool, params map[string]string) bool {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*inbox = resp.Inbox
-			inbox.inst = insta
+			inbox.insta = insta
 			inbox.SeqID = resp.Inbox.SeqID
 			inbox.PendingRequestsTotal = resp.Inbox.PendingRequestsTotal
 			inbox.SnapshotAtMs = resp.Inbox.SnapshotAtMs
 			for i := range inbox.Conversations {
-				inbox.Conversations[i].inst = insta
+				inbox.Conversations[i].insta = insta
 				inbox.Conversations[i].firstRun = true
 			}
 			if inbox.Cursor == "" || !inbox.HasOlder {
@@ -163,7 +163,7 @@ func (inbox *Inbox) SyncPending() error {
 //
 // See example: examples/inbox/newconversation.go
 func (inbox *Inbox) New(user *User, text string) error {
-	insta := inbox.inst
+	insta := inbox.insta
 	to, err := prepareRecipients(user.ID)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ func (inbox *Inbox) NextPending() bool {
 
 // Conversation is the representation of an instagram already established conversation through direct messages.
 type Conversation struct {
-	inst     *Instagram
+	insta    *Instagram
 	err      error
 	firstRun bool
 
@@ -269,7 +269,7 @@ func (c Conversation) lastItemID() string {
 //
 // See example: examples/media/likeAll.go
 func (c *Conversation) Like() error {
-	insta := c.inst
+	insta := c.insta
 	to, err := prepareRecipients(c)
 	if err != nil {
 		return err
@@ -303,7 +303,7 @@ func (c *Conversation) Like() error {
 //
 // See example: examples/inbox/sms.go
 func (c *Conversation) Send(text string) error {
-	insta := c.inst
+	insta := c.insta
 	// I DON'T KNOW WHY BUT INSTAGRAM WANTS A DOUBLE SLICE OF INTS FOR ONE ID.
 	to, err := prepareRecipients(c)
 	if err != nil {
@@ -354,7 +354,7 @@ func (c *Conversation) Next() bool {
 		return true
 	}
 
-	insta := c.inst
+	insta := c.insta
 	body, err := insta.sendRequest(
 		&reqOptions{
 			Endpoint: fmt.Sprintf(urlInboxThread, c.ID),
@@ -370,7 +370,7 @@ func (c *Conversation) Next() bool {
 		err = json.Unmarshal(body, &resp)
 		if err == nil {
 			*c = resp.Conversation
-			c.inst = insta
+			c.insta = insta
 			if !c.HasOlder {
 				c.err = ErrNoMore
 			}
