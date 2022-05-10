@@ -111,6 +111,11 @@ type userResp struct {
 	User   User   `json:"user"`
 }
 
+type usersResp struct {
+	Status string `json:"status"`
+	Users  []User `json:"users"`
+}
+
 // User is the representation of instagram's user profile
 type User struct {
 	insta *Instagram
