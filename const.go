@@ -132,6 +132,6 @@ const (
 	urlTagStories = "tags/%s/story/"
 	urlTagContent = "tags/%s/ranked_sections/"
 
-	// upload
-	urlUploadStory = "https://i.instagram.com/rupload_igphoto/103079408575885_0_-1340379573"
+	// Relacionated
+	urlChaining = "discover/chaining/?target_id=%d"
 )
