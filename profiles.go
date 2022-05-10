@@ -17,6 +17,16 @@ func newProfiles(insta *Instagram) *Profiles {
 	return profiles
 }
 
+func (prof *Profiles) BySuggested(id int64) ([]User, error) {
+	body, err := prof.insta.sendSimpleRequest(urlChaining, id)
+	if err == nil {
+		resp := usersResp{}
+		err = json.Unmarshal(body, &resp)
+		return resp.Users, err
+	}
+	return nil, err
+}
+
 // ByName return a *User structure parsed by username
 func (prof *Profiles) ByName(name string) (*User, error) {
 	body, err := prof.insta.sendSimpleRequest(urlUserByName, name)
